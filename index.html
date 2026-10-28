@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>GifteWin RANDOM</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0a08;--bg2:#15110d;--card:#1e1812;--card2:#2a2118;--line:rgba(255,255,255,.07);--gold:#c9a227;--gold2:#e8c547;--brown:#8b5e3c;--text:#f3ede6;--muted:#9a8b7a;--r:16px;--safe:env(safe-area-inset-bottom,0px);--blue:#0088cc}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 90% 50% at 50% -15%,rgba(201,162,39,.14),transparent 55%),radial-gradient(ellipse 50% 40% at 100% 100%,rgba(139,94,60,.1),transparent 50%)}
+button,input,textarea{font-family:inherit;font-size:inherit;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+.hide{display:none!important}
+svg{display:block;flex-shrink:0}
+.app,.modal,#adminGate,#loader{position:relative;z-index:1}
+
+.loader{position:fixed;inset:0;z-index:999;background:radial-gradient(ellipse at 50% 30%,#24180f 0%,var(--bg) 70%);display:flex;align-items:center;justify-content:center;transition:opacity .4s,visibility .4s}
+.loader.out{opacity:0;visibility:hidden;pointer-events:none}
+.loader-box{text-align:center;padding:24px}
+.logo-wrap{position:relative;width:88px;height:88px;margin:0 auto 18px}
+.logo-svg{width:100%;height:100%;animation:float 2.4s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(201,162,39,.4))}
+.logo-ring{position:absolute;inset:-12px;border:2px solid rgba(201,162,39,.2);border-top-color:var(--gold);border-radius:50%;animation:spin 7s linear infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-title{font-size:22px;font-weight:800;margin-bottom:16px}
+.loader-title span{color:var(--gold);font-weight:600}
+.loader-bar{width:150px;height:3px;margin:0 auto 10px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.loader-fill{height:100%;width:0;background:linear-gradient(90deg,var(--brown),var(--gold));transition:width .3s}
+.loader-hint{color:var(--muted);font-size:12px}
+
+.app{min-height:100%;padding-bottom:calc(18px + var(--safe));animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 6px;position:sticky;top:0;z-index:40;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
+.hdr-l{display:flex;align-items:center;gap:9px;cursor:pointer}
+.hdr-ico{width:34px;height:34px;border-radius:10px;background:var(--card);display:flex;align-items:center;justify-content:center}
+.hdr-name{font-weight:700;font-size:14px;line-height:1.1}
+.hdr-tag{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:1px}
+.btn-ch{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#0077b5,#00a0e3);color:#fff;font-size:12px;font-weight:600;padding:7px 12px;border-radius:16px}
+.btn-ch svg{width:14px;height:14px}
+
+.user{display:flex;align-items:center;gap:10px;margin:4px 14px 10px;padding:10px 12px;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
+.av{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--brown),var(--gold));color:#0c0a08;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.um{flex:1;min-width:0}
+.un{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ul{font-size:12px;color:var(--gold2);margin-top:2px;font-weight:600}
+.btn-ref{width:36px;height:36px;border-radius:10px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+.tabs{display:flex;gap:5px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;border:1px solid transparent;background:var(--card);color:var(--muted);padding:8px 11px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.tab svg{width:13px;height:13px;opacity:.7}
+.tab.on{background:rgba(201,162,39,.15);border-color:rgba(201,162,39,.35);color:var(--gold2)}
+.tab.on svg{opacity:1;color:var(--gold)}
+
+.main{padding:0 14px}
+.panel{display:none;animation:up .22s ease}
+.panel.on{display:block}
+.sec{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+
+.list{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--card);border-radius:var(--r);padding:12px;border:1px solid var(--line)}
+.card-top{display:flex;gap:9px;align-items:flex-start;margin-bottom:6px}
+.card-ico{width:36px;height:36px;border-radius:10px;background:rgba(201,162,39,.12);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.card-ico svg{width:18px;height:18px}
+.card-ti{font-weight:700;font-size:13px}
+.card-tm{font-size:11px;color:var(--gold);font-weight:600;margin-top:2px}
+.card-pr{font-size:12px;color:var(--gold2);font-weight:600;margin-bottom:6px}
+.card-row{display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--muted);margin-bottom:4px}
+.badge{background:rgba(0,136,204,.15);color:#5bc0ff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px}
+.empty{text-align:center;padding:36px 14px;color:var(--muted);font-size:13px;line-height:1.5}
+.btn-main{width:100%;margin-top:8px;cursor:pointer;background:linear-gradient(135deg,var(--brown),var(--gold));color:#0c0a08;font-size:14px;font-weight:700;padding:12px;border-radius:12px;box-shadow:0 4px 16px rgba(201,162,39,.28)}
+.btn-main:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{width:100%;margin-top:8px;cursor:pointer;background:transparent;color:var(--gold2);font-size:13px;font-weight:600;padding:11px;border-radius:12px;border:1px solid rgba(201,162,39,.3)}
+.btn-danger{color:#e74c3c;border-color:rgba(231,76,60,.35)}
+
+.form{display:flex;flex-direction:column;gap:11px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input,.field textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.chip.on{background:rgba(201,162,39,.16);border-color:var(--gold);color:var(--gold2)}
+.check{display:flex;align-items:center;gap:8px;font-size:12px}
+
+.list-top{display:flex;flex-direction:column;gap:6px}
+.top-r{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:10px;border:1px solid var(--line)}
+.top-rk{width:22px;font-weight:700;color:var(--gold);font-size:13px}
+.top-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--brown),var(--gold));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#0c0a08;overflow:hidden}
+.top-av img{width:100%;height:100%;object-fit:cover}
+.top-nm{flex:1;font-weight:600;font-size:13px}
+.top-bl{color:var(--gold);font-weight:700;font-size:12px}
+
+/* CHAT */
+.chat-box{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:320px}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 12px}
+.msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.35}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,rgba(139,94,60,.5),rgba(201,162,39,.25));border:1px solid rgba(201,162,39,.2)}
+.msg.other{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.msg-h{font-size:10px;font-weight:700;color:var(--gold);margin-bottom:3px}
+.msg-t{font-size:10px;color:var(--muted);margin-top:4px}
+.chat-in{display:flex;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+.chat-in input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:13px;outline:none}
+.chat-in button{width:44px;border-radius:12px;background:linear-gradient(135deg,var(--brown),var(--gold));color:#0c0a08;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:10px}
+.sheet{background:var(--bg2);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;border-radius:18px 18px 12px 12px;padding:18px 14px 24px;position:relative;border:1px solid rgba(201,162,39,.12);animation:sheet .25s ease}
+@keyframes sheet{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.mx{position:absolute;top:8px;right:12px;color:var(--muted);font-size:22px;cursor:pointer;background:none;border:none}
+.m-ti{font-size:16px;font-weight:700;margin-bottom:4px;padding-right:24px}
+.m-pr{color:var(--gold);font-weight:600;font-size:12px;margin-bottom:8px}
+.m-tm{text-align:center;font-size:22px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;margin:6px 0 10px;background:rgba(201,162,39,.1);padding:10px;border-radius:10px;border:1px solid rgba(201,162,39,.2)}
+.note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:8px;padding:10px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid var(--line)}
+.msg{position:relative}
+.msg-del{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted);opacity:0;cursor:pointer;background:none;border:none;padding:2px 5px}
+.msg:hover .msg-del,.msg.me .msg-del{opacity:.7}
+.msg-del:active{opacity:1;color:#e74c3c}
+.media-prev{margin-top:8px;border-radius:12px;overflow:hidden;max-height:160px;display:none;border:1px solid var(--line)}
+.media-prev img,.media-prev video{width:100%;max-height:160px;object-fit:cover;display:block}
+.card-media{width:100%;height:130px;border-radius:12px;object-fit:cover;margin-bottom:10px;background:var(--card2);border:1px solid var(--line)}
+.m-media{width:100%;max-height:180px;object-fit:cover;border-radius:12px;margin-bottom:12px;background:var(--card)}
+.chat-tools{display:flex;justify-content:flex-end;margin-bottom:6px}
+.chat-tools button{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px}
+.chat-tools button:active{color:#e74c3c}
+.toast{position:fixed;bottom:calc(16px + var(--safe));left:50%;transform:translateX(-50%);z-index:200;background:var(--card);padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid rgba(201,162,39,.3);box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap}
+.warn{color:#e74c3c;font-size:12px;margin-top:8px;font-weight:600}
+.ok{color:#81c784;font-size:12px;margin-top:8px;font-weight:600}
+</style>
+</head>
+<body>
+<div id="loader" class="loader">
+  <div class="loader-box">
+    <div class="logo-wrap">
+      <svg class="logo-svg" viewBox="0 0 64 64" fill="none"><rect x="12" y="28" width="40" height="28" rx="4" fill="#F5F0E8"/><rect x="30" y="28" width="4" height="28" fill="#C9A227"/><rect x="12" y="26" width="40" height="8" rx="2" fill="#F5F0E8"/><path d="M32 26C32 26 28 14 20 16C14 17.5 14 24 20 26H32Z" fill="#C9A227"/><path d="M32 26C32 26 36 14 44 16C50 17.5 50 24 44 26H32Z" fill="#C9A227"/><circle cx="32" cy="26" r="4" fill="#E8C547"/></svg>
+      <div class="logo-ring"></div>
+    </div>
+    <h1 class="loader-title">GifteWin <span>RANDOM</span></h1>
+    <div class="loader-bar"><div class="loader-fill" id="fill"></div></div>
+    <p class="loader-hint" id="hint">Загрузка...</p>
+  </div>
+</div>
+
+<div id="app" class="app hide">
+  <header class="hdr">
+    <div class="hdr-l" id="logoTap">
+      <div class="hdr-ico"><svg viewBox="0 0 32 32" fill="none"><rect x="6" y="14" width="20" height="14" rx="2" fill="#F5F0E8"/><rect x="15" y="14" width="2" height="14" fill="#C9A227"/><rect x="6" y="13" width="20" height="4" rx="1" fill="#F5F0E8"/><path d="M16 13C16 13 14 7 10 8C7 8.8 7 12 10 13H16Z" fill="#C9A227"/><path d="M16 13C16 13 18 7 22 8C25 8.8 25 12 22 13H16Z" fill="#C9A227"/></svg></div>
+      <div><div class="hdr-name">GifteWin</div><div class="hdr-tag">RANDOM</div></div>
+    </div>
+    <a class="btn-ch" href="https://t.me/GifteWin" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+      Канал
+    </a>
+  </header>
+
+  <div class="user">
+    <div class="av" id="av">G</div>
+    <div class="um">
+      <div class="un" id="nick">Гость</div>
+      <div class="ul"><span id="luck">0</span> ⭐</div>
+    </div>
+    <button class="btn-ref" id="ref" title="Реферал">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+    </button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Активные</button>
+    <button class="tab" data-t="create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>Создать</button>
+    <button class="tab" data-t="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Мои</button>
+    <button class="tab" data-t="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Задания</button>
+    <button class="tab" data-t="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Чат</button>
+    <button class="tab" data-t="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0V4z"/></svg>Топ</button>
+    <button class="tab" data-t="promo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Промо</button>
+    <button class="tab" data-t="bonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16.8 5.6 21.2 8 14 2 9.2h7.6z"/></svg>Бонус</button>
+  </div>
+
+  <main class="main">
+    <section id="p-active" class="panel on"><div class="sec">Активные розыгрыши</div><div id="listA" class="list"></div></section>
+
+    <section id="p-create" class="panel">
+      <div class="sec">Создать розыгрыш</div>
+      <form id="form" class="form">
+        <div class="field"><label>Тип приза</label>
+          <div class="chips" id="cType">
+            <button type="button" class="chip on" data-v="gift">Подарок</button>
+            <button type="button" class="chip" data-v="stars">Звёзды</button>
+            <button type="button" class="chip" data-v="nft">NFT</button>
+            <button type="button" class="chip" data-v="other">Другое</button>
+          </div>
+        </div>
+        <div class="field"><label>Название</label><input id="fTitle" maxlength="60" required placeholder="Название розыгрыша"></div>
+        <div class="field"><label>Описание</label><textarea id="fDesc" rows="2" placeholder="Условия..."></textarea></div>
+        <div class="field"><label>Детали приза</label><input id="fPrize" required placeholder="Что получит победитель"></div>
+        <div class="field"><label>Фото / GIF приза (ссылка)</label>
+          <input id="fMedia" type="url" placeholder="https://example.com/prize.gif">
+          <div class="media-prev" id="mediaPrev"></div>
+          <p style="font-size:11px;color:var(--muted);margin-top:5px">Вставь прямую ссылку на .jpg / .png / .gif / .webp</p>
+        </div>
+        <div class="field"><label>Победителей</label>
+          <div class="chips" id="cWin">
+            <button type="button" class="chip on" data-v="1">1</button>
+            <button type="button" class="chip" data-v="2">2</button>
+            <button type="button" class="chip" data-v="3">3</button>
+            <button type="button" class="chip" data-v="5">5</button>
+          </div>
+        </div>
+        <div class="field"><label>Итоги через</label>
+          <div class="chips" id="cTime">
+            <button type="button" class="chip" data-v="+1h">1 час</button>
+            <button type="button" class="chip on" data-v="+6h">6 часов</button>
+            <button type="button" class="chip" data-v="+1d">1 день</button>
+            <button type="button" class="chip" data-v="+3d">3 дня</button>
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="fBoost"> Требовать Boost</label>
+        <div class="field hide" id="boostField"><label>Ссылка Boost</label><input id="fBoostLink" value="https://t.me/boost/GifteWin"></div>
+        <button type="submit" class="btn-main">Создать розыгрыш</button>
+      </form>
+    </section>
+
+    <section id="p-my" class="panel"><div class="sec">Мои розыгрыши</div><div id="listM" class="list"></div></section>
+
+    <section id="p-tasks" class="panel">
+      <div class="sec">Задания на ⭐</div>
+      <div id="listTasks" class="list"></div>
+      <button type="button" class="btn-ghost" id="tShowCreate" style="margin-top:12px">+ Создать задание</button>
+      <div id="taskCreateBox" class="form hide" style="margin-top:12px">
+        <div class="field"><label>Название</label><input id="tTitle" placeholder="Подпишись на мой канал" maxlength="80"></div>
+        <div class="field"><label>Тип</label>
+          <div class="chips" id="cTaskType">
+            <button type="button" class="chip on" data-v="subscribe">Подписка</button>
+            <button type="button" class="chip" data-v="boost">Boost</button>
+            <button type="button" class="chip" data-v="reaction">Реакция</button>
+            <button type="button" class="chip" data-v="link">Ссылка</button>
+          </div>
+        </div>
+        <div class="field"><label>Ссылка</label><input id="tLink" type="url" placeholder="https://t.me/..."></div>
+        <div class="field"><label>Награда ⭐</label><input id="tReward" type="number" min="1" value="10"></div>
+        <div class="field"><label>Сколько человек могут выполнить</label><input id="tSlots" type="number" min="1" max="500" value="20">
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">С баланса спишется: награда × число людей</p>
+        </div>
+        <button type="button" class="btn-main" id="tCreate">Опубликовать задание</button>
+      </div>
+    </section>
+
+    <section id="p-chat" class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="sec" style="margin:0">Чат GifteWin</div>
+        <div class="chat-tools"><button type="button" id="chatClear">Очистить чат</button></div>
+      </div>
+      <div class="chat-box">
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-in">
+          <input id="chatInput" placeholder="Сообщение..." maxlength="300">
+          <button type="button" id="chatSend"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+      <p class="note">Пиши сообщения ниже. История сохраняется. Чтобы чат был общим у всех — админ может включить синхронизацию через сервер позже.</p>
+    </section>
+
+    <section id="p-top" class="panel"><div class="sec">Топ по ⭐</div><div id="listT" class="list-top"></div></section>
+
+    <section id="p-promo" class="panel">
+      <div class="sec">Промокод</div>
+      <div class="form">
+        <div class="field"><label>Введи промокод</label><input id="fPromo" placeholder="CODE" maxlength="32" style="text-transform:uppercase"></div>
+        <button type="button" class="btn-main" id="btnPromo">Активировать</button>
+        <div id="promoMsg"></div>
+        <p class="note" id="promoNote">Админ создаёт промокоды и жмёт <b>«Ссылка — промокоды у всех»</b> в админке. Открой эту ссылку (или приложение по ней) — коды появятся у тебя автоматически.</p>
+      </div>
+    </section>
+
+    <section id="p-bonus" class="panel">
+      <div class="sec">Бонусы</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-ti">Приветственный бонус</div>
+        <p style="font-size:12px;color:var(--muted);margin:8px 0">Один раз при первом входе</p>
+        <button type="button" class="btn-main" id="btnWelcome">Забрать +25 ⭐</button>
+        <p id="welcomeMsg" style="font-size:12px;margin-top:8px"></p>
+      </div>
+      <div class="card">
+        <div class="card-ti">Ежедневный бонус</div>
+        <p style="font-size:12px;color:var(--muted);margin:8px 0">День 1: <b>5 ⭐</b> · День 2: <b>10 ⭐</b> · День 3+: <b>100 ⭐</b></p>
+        <p style="font-size:12px;color:var(--gold);margin-bottom:8px">Серия: <b id="streakVal">0</b> дн.</p>
+        <button type="button" class="btn-main" id="btnDaily">Забрать сегодня</button>
+        <p id="dailyMsg" style="font-size:12px;margin-top:8px"></p>
+      </div>
+      <p class="note" style="margin-top:12px">Заходи каждый день подряд — награда растёт. Пропустил день — серия сбрасывается на 5 ⭐.</p>
+    </section>
+<section id="p-admin" class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px">
+        <div class="sec" style="margin:0">Админ-панель</div>
+        <button type="button" class="btn-ghost" id="adminExit" style="width:auto;margin:0;padding:8px 14px;font-size:12px">← Выйти</button>
+      </div>
+      <div class="form">
+        <div class="field"><label>Новый промокод</label><input id="aCode" placeholder="CODE123" maxlength="24" style="text-transform:uppercase"></div>
+        <div class="field"><label>Сколько ⭐</label><input id="aStars" type="number" min="1" value="50"></div>
+        <div class="field"><label>Лимит активаций (0 = ∞)</label><input id="aLimit" type="number" min="0" value="100"></div>
+        <button type="button" class="btn-main" id="aCreatePromo">Создать промокод</button>
+        <div id="aPromoList"></div>
+        <div class="field" style="margin-top:8px"><label>Общий доступ к промокодам</label>
+          <textarea id="aExport" rows="2" readonly style="font-size:11px"></textarea>
+          <button type="button" class="btn-main" id="aShareSync" style="margin-top:8px">Ссылка — промокоды у всех</button>
+          <button type="button" class="btn-ghost" id="aCopyExport" style="margin-top:6px">Копировать код синхронизации</button>
+        </div>
+        <div class="field"><label>Импорт (если пришла строка)</label>
+          <textarea id="aImport" rows="2" placeholder="Вставь код синхронизации..."></textarea>
+          <button type="button" class="btn-ghost" id="aDoImport" style="margin-top:6px">Импортировать</button>
+        </div>
+        <p class="note">Нажми «Ссылка — промокоды у всех», отправь ссылку в канал. Кто откроет — получит все промокоды автоматически.</p>
+        <hr style="border:none;border-top:1px solid var(--line);margin:8px 0">
+        <div class="field"><label>Админ — username без @</label><input id="aAdminUser" placeholder="username"></div>
+        <div class="field"><label>Пароль админа</label><input id="aAdminPass" placeholder="пароль" maxlength="64"></div>
+        <button type="button" class="btn-main" id="aAddAdmin" style="background:linear-gradient(135deg,#2a4a6b,#3d7ab5);color:#fff">Добавить админа</button>
+        <div id="aAdminList"></div>
+        <div id="aStats" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal hide"><div class="sheet"><button class="mx" id="mx">×</button><div id="mb"></div></div></div>
+<div id="adminGate" class="modal hide">
+  <div class="sheet" style="max-width:340px">
+    <button class="mx" id="gateX">×</button>
+    <div class="m-ti">Админ-доступ</div>
+    <div class="field" style="margin-top:12px"><label>Пароль</label><input id="gatePass" type="password" placeholder="••••••••" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px"></div>
+    <button type="button" class="btn-main" id="gateOk" style="margin-top:12px">Войти</button>
+    <p id="gateErr" class="warn"></p>
+  </div>
+</div>
+<div id="toast" class="toast hide"></div>
+
+<script>
+(function(){
+'use strict';
+var tg=window.Telegram&&window.Telegram.WebApp;
+if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#0c0a08');tg.setBackgroundColor('#0c0a08')}catch(e){}}
+
+var ADMIN_PASS='9944191q';
+var STORAGE_KEY='giftewin_v6';
+var tgUser=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
+
+function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(e){return null}}
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      points:S.user.stars,usedPromos:S.usedPromos,giveaways:S.giveaways,my:S.my,top:S.top,
+      promos:S.promos,admins:S.admins,isAdmin:S.isAdmin,tasks:S.tasks,doneTasks:S.doneTasks,chat:S.chat,
+      welcome:S.welcome,lastDaily:S.lastDaily,dailyStreak:S.dailyStreak
+    }));
+  }catch(e){}
+}
+
+var saved=loadState();
+var S={
+  user:{
+    id:tgUser&&tgUser.id||0,
+    first_name:tgUser&&tgUser.first_name||'Гость',
+    last_name:tgUser&&tgUser.last_name||'',
+    username:tgUser&&tgUser.username||null,
+    photo_url:tgUser&&tgUser.photo_url||null,
+    stars:(saved&&typeof saved.points==='number')?saved.points:0
+  },
+  giveaways:(saved&&saved.giveaways)||[],
+  my:(saved&&saved.my)||[],
+  top:(saved&&saved.top)||[],
+  promos:(saved&&saved.promos)||{},
+  usedPromos:(saved&&saved.usedPromos)||[],
+  admins:(saved&&saved.admins)||[],
+  isAdmin:!!(saved&&saved.isAdmin),
+  tasks:(saved&&saved.tasks)||[],
+  doneTasks:(saved&&saved.doneTasks)||[],
+  chat:(saved&&saved.chat)||[],
+  welcome:!!(saved&&saved.welcome),
+  lastDaily:(saved&&saved.lastDaily)||'',
+  dailyStreak:(saved&&saved.dailyStreak)|0
+};
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function pad(n){return n<10?'0'+n:''+n}
+function cd(iso){var d=new Date(iso)-Date.now();if(d<=0)return 'Итоги';var days=Math.floor(d/86400000),h=Math.floor((d%86400000)/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);if(days>0)return days+'д '+pad(h)+':'+pad(m)+':'+pad(s);if(h>0)return pad(h)+':'+pad(m)+':'+pad(s);return pad(m)+':'+pad(s)}
+function toast(m){var el=document.getElementById('toast');el.textContent=m;el.classList.remove('hide');setTimeout(function(){el.classList.add('hide')},2400)}
+function isUserAdmin(){
+  if(S.isAdmin)return true;
+  var u=(S.user.username||'').toLowerCase();
+  if(!u)return false;
+  return (S.admins||[]).some(function(a){var n=typeof a==='string'?a:(a.username||'');return n.toLowerCase()===u});
+}
+function findAdminPass(username){
+  var u=(username||'').toLowerCase();
+  for(var i=0;i<(S.admins||[]).length;i++){
+    var a=S.admins[i];var n=typeof a==='string'?a:(a.username||'');
+    if(n.toLowerCase()===u)return typeof a==='object'?a.pass:'';
+  }
+  return '';
+}
+function avHtml(url,letter){
+  if(url)return '<img src="'+esc(url)+'" alt="" onerror="this.remove()">';
+  return esc((letter||'G').charAt(0).toUpperCase());
+}
+function updateUserUI(){
+  var u=S.user;
+  document.getElementById('nick').textContent=u.username?'@'+u.username:(u.first_name||'Гость');
+  document.getElementById('luck').textContent=u.stars;
+  var av=document.getElementById('av');
+  if(u.photo_url){av.innerHTML='<img src="'+esc(u.photo_url)+'" alt="">'}
+  else{av.textContent=(u.first_name||'G').charAt(0).toUpperCase()}
+}
+function bumpTop(){
+  var u=S.user;
+  var found=S.top.find(function(t){return (t.id&&t.id===u.id)||(t.username&&u.username&&t.username===u.username)});
+  if(found){found.luck_balls=u.stars;found.photo_url=u.photo_url}
+  else S.top.push({id:u.id,username:u.username,full_name:u.first_name,luck_balls:u.stars,photo_url:u.photo_url});
+  S.top.sort(function(a,b){return b.luck_balls-a.luck_balls});
+}
+
+function emptyHtml(t){return '<div class="empty">'+t+'</div>'}
+
+function cardHtml(g){
+  var done=g.status==='finished';
+  var media=g.prize_media?'<img class="card-media" src="'+esc(g.prize_media)+'" alt="" onerror="this.style.display=\'none\'">':'';
+  return '<div class="card" data-id="'+g.id+'">'+media+
+    '<div class="card-top"><div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8V21M3 12h18"/></svg></div>'+
+    '<div><div class="card-ti">'+esc(g.title)+'</div><div class="card-tm" data-end="'+g.end_at+'">'+(done?'Завершён':cd(g.end_at))+'</div></div></div>'+
+    '<div class="card-pr">'+esc(g.prize_info)+'</div>'+
+    '<div class="card-row"><span>👥 '+(g.participants||[]).length+'</span><span>🏆 ×'+g.winners_count+'</span>'+(g.boost_required?'<span class="badge">Boost</span>':'')+'</div></div>';
+}
+function renderA(){
+  var el=document.getElementById('listA');
+  if(!S.giveaways.length){el.innerHTML=emptyHtml('Нет активных розыгрышей.<br>Создай первый во вкладке «Создать»');return}
+  el.innerHTML=S.giveaways.map(cardHtml).join('');
+  el.querySelectorAll('.card').forEach(function(c){c.onclick=function(){openM(+c.dataset.id)}});
+}
+function renderM(){
+  var el=document.getElementById('listM');
+  if(!S.my.length){el.innerHTML=emptyHtml('Ты ещё не создавал розыгрыши');return}
+  el.innerHTML=S.my.map(cardHtml).join('');
+  el.querySelectorAll('.card').forEach(function(c){c.onclick=function(){openM(+c.dataset.id)}});
+}
+function renderT(){
+  var el=document.getElementById('listT');
+  if(!S.top.length){el.innerHTML=emptyHtml('Топ пуст — выполняй задания и активируй промо');return}
+  el.innerHTML=S.top.slice(0,50).map(function(u,i){
+    var n=u.username?'@'+u.username:(u.full_name||'User');
+    return '<div class="top-r"><div class="top-rk">'+(i+1)+'</div><div class="top-av">'+avHtml(u.photo_url,n)+'</div><div class="top-nm">'+esc(n)+'</div><div class="top-bl">'+u.luck_balls+' ⭐</div></div>';
+  }).join('');
+}
+function renderTasks(){
+  var el=document.getElementById('listTasks');
+  var list=S.tasks||[];
+  if(!list.length){el.innerHTML=emptyHtml('Заданий пока нет.<br>Нажми «+ Создать задание» ниже');}
+  else{
+    el.innerHTML=list.map(function(t){
+      var done=(S.doneTasks||[]).indexOf(t.id)>=0;
+      var left=typeof t.left==='number'?t.left:'∞';
+      var by=t.creator?(' · @'+String(t.creator).replace(/^@/,'')):'';
+      var mine=t.creator_id&&t.creator_id===S.user.id;
+      return '<div class="card"><div class="card-top"><div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16.8 5.6 21.2 8 14 2 9.2h7.6z"/></svg></div>'+
+        '<div><div class="card-ti">'+esc(t.title)+'</div><div class="card-tm">+'+t.reward+' ⭐ · осталось '+left+esc(by)+'</div></div></div>'+
+        (mine?'<button type="button" class="btn-main btn-danger" data-tdel="'+t.id+'" style="background:transparent">Удалить своё</button>':
+        '<button type="button" class="btn-main" data-do="'+t.id+'" '+(done?'disabled':'')+'>'+(done?'Выполнено ✓':'Выполнить')+'</button>')+'</div>';
+    }).join('');
+    el.querySelectorAll('[data-do]').forEach(function(b){if(!b.disabled)b.onclick=function(){startTask(+b.getAttribute('data-do'))}});
+    el.querySelectorAll('[data-tdel]').forEach(function(b){b.onclick=function(){
+      var tid=+b.getAttribute('data-tdel');var t=S.tasks.find(function(x){return x.id===tid});
+      if(!t||t.creator_id!==S.user.id)return;
+      if(!confirm('Удалить и вернуть остаток ⭐?'))return;
+      S.user.stars+=(typeof t.pool==='number'?t.pool:0);updateUserUI();
+      S.tasks=S.tasks.filter(function(x){return x.id!==tid});saveState();renderTasks();toast('Удалено');
+    }});
+  }
+  document.getElementById('tShowCreate').classList.remove('hide');
+}
+function startTask(id){
+  var t=S.tasks.find(function(x){return x.id===id});if(!t)return;
+  if((S.doneTasks||[]).indexOf(id)>=0){toast('Уже выполнено');return}
+  if(t.creator_id&&t.creator_id===S.user.id){toast('Нельзя выполнить своё');return}
+  if(typeof t.left==='number'&&t.left<=0){toast('Лимит исчерпан');return}
+  var link=t.link||'https://t.me/GifteWin';
+  if(tg){try{tg.openTelegramLink(link)}catch(e){window.open(link,'_blank')}}else window.open(link,'_blank');
+  toast('Выполни действие…');
+  var btn=document.querySelector('[data-do="'+id+'"]');
+  if(btn){btn.textContent='Проверка…';btn.disabled=true}
+  setTimeout(function(){
+    t=S.tasks.find(function(x){return x.id===id});if(!t)return;
+    if((S.doneTasks||[]).indexOf(id)>=0)return;
+    if(typeof t.pool==='number'&&t.pool<(t.reward|0)){toast('Награды закончились');renderTasks();return}
+    S.doneTasks.push(id);
+    var pay=t.reward|0;
+    if(typeof t.pool==='number')t.pool-=pay;
+    if(typeof t.left==='number')t.left-=1;
+    S.user.stars+=pay;updateUserUI();bumpTop();
+    if(typeof t.left==='number'&&t.left<=0)S.tasks=S.tasks.filter(function(x){return x.id!==id});
+    saveState();renderTasks();toast('+'+pay+' ⭐');
+    if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+  },2200);
+}
+
+function renderChat(){
+  var el=document.getElementById('chatMsgs');
+  if(!el)return;
+  if(!S.chat)S.chat=[];
+  purgeOldChat();
+  if(!S.chat.length){el.innerHTML='<div class="empty">Пока тихо. Напиши первым!</div>';return}
+  el.innerHTML=S.chat.slice(-100).map(function(m,idx){
+    var realIdx=S.chat.length-Math.min(S.chat.length,100)+idx;
+    var me=(m.uid&&S.user.id&&m.uid===S.user.id)||(m.name&&S.user.username&&m.name==='@'+S.user.username);
+    var canDel=me||S.isAdmin||isUserAdmin();
+    return '<div class="msg '+(me?'me':'other')+'" data-mi="'+realIdx+'"><div class="msg-h">'+esc(m.name||'User')+'</div>'+esc(m.text||'')+'<div class="msg-t">'+esc(m.time||'')+'</div>'+(canDel?'<button type="button" class="msg-del" data-mdel="'+realIdx+'" title="Удалить">✕</button>':'')+'</div>';
+  }).join('');
+  el.querySelectorAll('[data-mdel]').forEach(function(b){
+    b.onclick=function(e){
+      e.stopPropagation();
+      var i=+b.getAttribute('data-mdel');
+      if(i<0||i>=S.chat.length)return;
+      S.chat.splice(i,1);saveState();renderChat();toast('Сообщение удалено');
+    };
+  });
+  setTimeout(function(){el.scrollTop=el.scrollHeight},30);
+}
+function purgeOldChat(){
+  if(!S.chat||!S.chat.length)return;
+  var cut=Date.now()-24*60*60*1000;
+  var before=S.chat.length;
+  S.chat=S.chat.filter(function(m){
+    if(!m.ts)return true;
+    return m.ts>cut;
+  });
+  if(S.chat.length!==before)saveState();
+}
+
+function openM(id){
+  var g=S.giveaways.find(function(x){return x.id===id})||S.my.find(function(x){return x.id===id});if(!g)return;
+  var joined=(g.participants||[]).some(function(p){return p.user_id===S.user.id});
+  var mine=g.creator_id===S.user.id;
+  var mediaHtml=g.prize_media?'<img class="m-media" src="'+esc(g.prize_media)+'" alt="" onerror="this.style.display=\'none\'">':'';
+  document.getElementById('mb').innerHTML=mediaHtml+
+    '<div class="m-ti">'+esc(g.title)+'</div><div class="m-pr">'+esc(g.prize_info)+'</div>'+
+    (g.status!=='finished'?'<div class="m-tm" data-end="'+g.end_at+'">'+cd(g.end_at)+'</div>':'')+
+    '<div class="card-row"><span>👥 '+(g.participants||[]).length+'</span><span>🏆 '+g.winners_count+'</span></div>'+
+    (g.description?'<p style="font-size:12px;color:var(--muted);margin:8px 0">'+esc(g.description)+'</p>':'')+
+    (g.status==='active'&&!joined?'<button class="btn-main" id="bj">Участвовать</button>':'')+
+    (joined?'<p class="ok">Вы уже участвуете</p>':'')+
+    (mine&&g.status==='active'?'<button class="btn-main btn-danger" id="bDel" style="background:transparent;margin-top:8px">Удалить розыгрыш</button>':'');
+  document.getElementById('modal').classList.remove('hide');
+  var bj=document.getElementById('bj');
+  if(bj)bj.onclick=function(){
+    if(!S.user.id){toast('Открой через Telegram');return}
+    if(g.boost_required){
+      var link=g.boost_link||'https://t.me/boost/GifteWin';
+      if(tg){try{tg.openTelegramLink(link)}catch(e){window.open(link,'_blank')}}
+      else window.open(link,'_blank');
+    }
+    g.participants=g.participants||[];
+    g.participants.push({user_id:S.user.id,username:S.user.username,full_name:S.user.first_name,luck_at_join:S.user.stars});
+    saveState();toast('Вы в розыгрыше');closeM();renderA();
+  };
+  var bDel=document.getElementById('bDel');
+  if(bDel)bDel.onclick=function(){
+    if(!confirm('Удалить розыгрыш?'))return;
+    S.giveaways=S.giveaways.filter(function(x){return x.id!==g.id});
+    S.my=S.my.filter(function(x){return x.id!==g.id});
+    saveState();closeM();renderA();renderM();toast('Удалено');
+  };
+}
+function closeM(){document.getElementById('modal').classList.add('hide')}
+
+function openAdmin(){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on')});
+  document.getElementById('p-admin').classList.add('on');
+  renderAdmin();
+}
+function renderAdmin(){
+  var list=document.getElementById('aPromoList');
+  var keys=Object.keys(S.promos||{});
+  list.innerHTML=keys.length?('<div class="sec" style="margin-top:10px">Промокоды</div>'+keys.map(function(c){
+    var pr=S.promos[c];var lim=pr.limit>0?(pr.used+'/'+pr.limit):('∞ · '+pr.used);
+    return '<div class="top-r" style="margin-bottom:6px"><div class="top-nm"><b>'+esc(c)+'</b><div style="font-size:11px;color:var(--muted)">'+pr.stars+' ⭐ · '+lim+'</div></div><button type="button" data-del="'+esc(c)+'" style="color:#e74c3c;font-size:12px;font-weight:600;background:none;border:none;cursor:pointer">Удалить</button></div>';
+  }).join('')):'';
+  list.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){delete S.promos[b.getAttribute('data-del')];saveState();renderAdmin()}});
+  document.getElementById('aExport').value=encodePromos(S.promos);
+  var al=document.getElementById('aAdminList');
+  var ads=S.admins||[];
+  al.innerHTML=ads.length?ads.map(function(a,i){var n=typeof a==='string'?a:a.username;return '<div class="top-r" style="margin:6px 0"><div class="top-nm">@'+esc(n)+'</div><button type="button" data-rad="'+i+'" style="color:#e74c3c;font-size:12px;background:none;border:none;cursor:pointer">Снять</button></div>'}).join(''):'<p style="font-size:12px;color:var(--muted);margin-top:8px">Доп. админов нет</p>';
+  al.querySelectorAll('[data-rad]').forEach(function(b){b.onclick=function(){S.admins.splice(+b.getAttribute('data-rad'),1);saveState();renderAdmin()}});
+  document.getElementById('aStats').textContent='Розыгрышей: '+S.giveaways.length+' · Заданий: '+S.tasks.length+' · Промо: '+keys.length;
+}
+
+function switchT(n){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.t===n)});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+n)});
+  if(n==='active')renderA();
+  if(n==='my')renderM();
+  if(n==='top')renderT();
+  if(n==='tasks')renderTasks();
+  if(n==='chat')renderChat();
+  if(n==='bonus')renderBonus();
+  if(n==='admin'){if(isUserAdmin()||S.isAdmin)renderAdmin();else switchT('active')}
+}
+
+function setupAll(){
+  var type='gift',wins=1,time='+6h',tType='subscribe';
+  function bind(id,set){var el=document.getElementById(id);if(!el)return;el.querySelectorAll('.chip').forEach(function(b){b.onclick=function(){el.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')});b.classList.add('on');set(b.dataset.v)}})}
+  bind('cType',function(v){type=v});bind('cWin',function(v){wins=+v});bind('cTime',function(v){time=v});bind('cTaskType',function(v){tType=v});
+  var boostCb=document.getElementById('fBoost');
+  if(boostCb)boostCb.onchange=function(){document.getElementById('boostField').classList.toggle('hide',!boostCb.checked)};
+
+  var fMedia=document.getElementById('fMedia');
+  if(fMedia){fMedia.oninput=function(){
+    var v=this.value.trim(),box=document.getElementById('mediaPrev');
+    if(!box)return;
+    if(v&&/\.(gif|png|jpe?g|webp)(\?|$)/i.test(v)){
+      box.style.display='block';
+      box.innerHTML='<img src="'+esc(v)+'" alt="preview" onerror="this.parentNode.style.display=\'none\'">';
+    } else {box.style.display='none';box.innerHTML='';}
+  }}
+  document.getElementById('form').onsubmit=function(e){
+    e.preventDefault();
+    var title=document.getElementById('fTitle').value.trim();
+    var prize=document.getElementById('fPrize').value.trim();
+    if(!title||!prize){toast('Заполни поля');return}
+    var end=new Date();
+    if(time==='+1h')end.setHours(end.getHours()+1);
+    else if(time==='+6h')end.setHours(end.getHours()+6);
+    else if(time==='+1d')end.setDate(end.getDate()+1);
+    else end.setDate(end.getDate()+3);
+    var g={id:Date.now(),title:title,description:document.getElementById('fDesc').value.trim(),prize_type:type,prize_info:prize,prize_media:document.getElementById('fMedia').value.trim(),winners_count:wins,end_at:end.toISOString(),boost_required:boostCb.checked,boost_link:document.getElementById('fBoostLink').value.trim(),status:'active',winners:[],participants:[],creator_id:S.user.id,creator_username:S.user.username||''};
+    S.giveaways.unshift(g);S.my.unshift(g);saveState();toast('Розыгрыш создан');switchT('active');document.getElementById('form').reset();var mp=document.getElementById('mediaPrev');if(mp){mp.style.display='none';mp.innerHTML='';}
+  };
+
+  document.getElementById('tShowCreate').onclick=function(){document.getElementById('taskCreateBox').classList.toggle('hide')};
+  document.getElementById('tCreate').onclick=function(){
+    var title=(document.getElementById('tTitle').value||'').trim();
+    var link=(document.getElementById('tLink').value||'').trim();
+    var reward=parseInt(document.getElementById('tReward').value,10)||0;
+    var slots=parseInt(document.getElementById('tSlots').value,10)||20;
+    if(slots<1)slots=1;if(slots>500)slots=500;
+    if(!title||title.length<3){toast('Короткое название');return}
+    if(!link){toast('Укажи ссылку');return}
+    if(reward<1){toast('Награда минимум 1');return}
+    var cost=reward*slots;
+    if(S.user.stars<cost){toast('Нужно '+cost+' ⭐ на балансе');return}
+    S.user.stars-=cost;updateUserUI();
+    S.tasks.unshift({id:Date.now(),title:title,type:tType,link:link,reward:reward,slots:slots,left:slots,pool:cost,creator_id:S.user.id,creator:S.user.username||S.user.first_name});
+    saveState();document.getElementById('taskCreateBox').classList.add('hide');
+    document.getElementById('tTitle').value='';document.getElementById('tLink').value='';
+    renderTasks();toast('Задание создано · −'+cost+' ⭐');
+  };
+
+  document.getElementById('btnPromo').onclick=function(){
+    var code=(document.getElementById('fPromo').value||'').trim().toUpperCase();
+    var msg=document.getElementById('promoMsg');
+    if(!code){toast('Введи код');return}
+    var pr=S.promos[code];
+    if(!pr){msg.className='warn';msg.textContent='Промокод не найден. Если код создал админ на другом устройстве — нужен импорт или общий сервер.';toast('Не найден');return}
+    if(pr.limit>0&&pr.used>=pr.limit){msg.className='warn';msg.textContent='Лимит исчерпан';return}
+    if(S.usedPromos.indexOf(code)>=0){msg.className='warn';msg.textContent='Уже активирован';return}
+    S.user.stars+=pr.stars|0;pr.used=(pr.used||0)+1;S.usedPromos.push(code);
+    updateUserUI();bumpTop();saveState();
+    msg.className='ok';msg.textContent='+'+pr.stars+' ⭐ начислено';
+    document.getElementById('fPromo').value='';toast('+'+pr.stars+' ⭐');
+  };
+
+  function sendChat(){
+    var input=document.getElementById('chatInput');
+    var text=(input&&input.value||'').trim();
+    if(!text){toast('Введи сообщение');return}
+    if(text.length>300)text=text.slice(0,300);
+    var name=S.user.username?'@'+S.user.username:(S.user.first_name||'Гость');
+    var now=new Date();
+    if(!S.chat)S.chat=[];
+    S.chat.push({uid:S.user.id||0,name:name,text:text,time:pad(now.getHours())+':'+pad(now.getMinutes()),ts:Date.now()});
+    if(S.chat.length>200)S.chat=S.chat.slice(-200);
+    input.value='';
+    saveState();
+    renderChat();
+    if(tg&&tg.HapticFeedback)try{tg.HapticFeedback.impactOccurred('light')}catch(e){}
+  }
+  var chatClearBtn=document.getElementById('chatClear');
+  if(chatClearBtn)chatClearBtn.onclick=function(){
+    if(!S.chat||!S.chat.length){toast('Чат пуст');return}
+    if(!confirm('Очистить весь чат?'))return;
+    S.chat=[];saveState();renderChat();toast('Чат очищен');
+  };
+  var chatSendBtn=document.getElementById('chatSend');
+  var chatInputEl=document.getElementById('chatInput');
+  if(chatSendBtn)chatSendBtn.onclick=function(e){e.preventDefault();sendChat()};
+  if(chatInputEl){
+    chatInputEl.onkeydown=function(e){
+      if(e.key==='Enter'){e.preventDefault();sendChat()}
+    };
+  }
+
+  document.getElementById('adminExit').onclick=function(){switchT('active');toast('Вы вышли из админки')};
+  var btnW=document.getElementById('btnWelcome');
+  var btnD=document.getElementById('btnDaily');
+  if(btnW)btnW.onclick=claimWelcome;
+  if(btnD)btnD.onclick=claimDaily;
+  document.getElementById('logoTap').onclick=function(){
+    if(isUserAdmin()||S.isAdmin){openAdmin();return}
+    document.getElementById('adminGate').classList.remove('hide');
+    document.getElementById('gatePass').value='';
+    document.getElementById('gateErr').textContent='';
+  };
+  document.getElementById('gateX').onclick=function(){document.getElementById('adminGate').classList.add('hide')};
+  document.getElementById('gateOk').onclick=function(){
+    var pass=document.getElementById('gatePass').value;
+    var ok=pass===ADMIN_PASS||(findAdminPass(S.user.username)&&pass===findAdminPass(S.user.username));
+    if(pass===ADMIN_PASS)S.isAdmin=true;
+    if(ok){saveState();document.getElementById('adminGate').classList.add('hide');openAdmin();toast('Админ-доступ')}
+    else document.getElementById('gateErr').textContent='Неверный пароль';
+  };
+  document.getElementById('aCreatePromo').onclick=function(){
+    if(!isUserAdmin()&&!S.isAdmin){toast('Нет доступа');return}
+    var code=(document.getElementById('aCode').value||'').trim().toUpperCase();
+    var stars=parseInt(document.getElementById('aStars').value,10)||0;
+    var limit=parseInt(document.getElementById('aLimit').value,10);if(isNaN(limit)||limit<0)limit=0;
+    if(!code||code.length<3){toast('Код от 3 символов');return}
+    if(stars<1){toast('Укажи ⭐');return}
+    S.promos[code]={stars:stars,limit:limit,used:0};saveState();renderAdmin();
+    document.getElementById('aCode').value='';toast('Промокод '+code+' создан');
+  };
+  document.getElementById('aCopyExport').onclick=function(){
+    var t=document.getElementById('aExport');t.select();
+    try{navigator.clipboard.writeText(t.value);toast('Скопировано')}catch(e){toast('Скопируй вручную')}
+  };
+  
+  var shareBtn=document.getElementById('aShareSync');
+  if(shareBtn)shareBtn.onclick=function(){
+    if(!isUserAdmin()&&!S.isAdmin){toast('Нет доступа');return}
+    var link=buildShareLink();
+    document.getElementById('aExport').value=encodePromos(S.promos);
+    if(tg&&tg.openTelegramLink){
+      try{
+        tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent('Промокоды GifteWin RANDOM — открой ссылку, чтобы активировать'));
+        toast('Отправь ссылку пользователям');
+        return;
+      }catch(e){}
+    }
+    try{navigator.clipboard.writeText(link);toast('Ссылка скопирована')}catch(e){prompt('Скопируй ссылку:',link)}
+  };
+
+  document.getElementById('aDoImport').onclick=function(){
+    try{
+      var raw=document.getElementById('aImport').value.trim();
+      var obj=JSON.parse(decodeURIComponent(escape(atob(raw))));
+      if(typeof obj!=='object')throw 1;
+      S.promos=Object.assign({},S.promos,obj);saveState();renderAdmin();toast('Импорт готов');
+      document.getElementById('aImport').value='';
+    }catch(e){toast('Неверный экспорт')}
+  };
+  document.getElementById('aAddAdmin').onclick=function(){
+    if(!isUserAdmin()&&!S.isAdmin)return;
+    var u=(document.getElementById('aAdminUser').value||'').trim().replace(/^@/,'');
+    var ap=(document.getElementById('aAdminPass').value||'').trim();
+    if(!u){toast('Username');return}if(ap.length<4){toast('Пароль от 4 символов');return}
+    S.admins=S.admins.map(function(a){return typeof a==='string'?{username:a,pass:''}:a});
+    if(S.admins.some(function(a){return (a.username||'').toLowerCase()===u.toLowerCase()})){toast('Уже админ');return}
+    S.admins.push({username:u,pass:ap});saveState();renderAdmin();
+    document.getElementById('aAdminUser').value='';document.getElementById('aAdminPass').value='';toast('@'+u+' добавлен');
+  };
+
+  document.getElementById('ref').onclick=function(){
+    var link='https://t.me/GifteWinBot?start=ref_'+(S.user.id||0);
+    if(tg)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent('GifteWin RANDOM'));
+    else{navigator.clipboard.writeText(link);toast('Ссылка скопирована')}
+  };
+  document.getElementById('mx').onclick=closeM;
+  document.getElementById('modal').onclick=function(e){if(e.target.id==='modal')closeM()};
+  document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){switchT(t.dataset.t)}});
+}
+
+
+function encodePromos(obj){
+  try{return btoa(unescape(encodeURIComponent(JSON.stringify(obj||{}))))}catch(e){return ''}
+}
+function decodePromos(str){
+  try{return JSON.parse(decodeURIComponent(escape(atob(String(str||'').trim()))))}catch(e){return null}
+}
+function mergePromos(incoming){
+  if(!incoming||typeof incoming!=='object')return 0;
+  var n=0;
+  Object.keys(incoming).forEach(function(k){
+    var pr=incoming[k];
+    if(!pr||typeof pr!=='object')return;
+    if(!S.promos[k]){S.promos[k]={stars:pr.stars|0,limit:pr.limit|0,used:pr.used|0};n++;}
+    else{
+      // keep higher limit knowledge, don't reset used below remote if remote is source of truth for new codes
+      S.promos[k].stars=pr.stars|0;
+      S.promos[k].limit=pr.limit|0;
+      if(typeof pr.used==='number'&&pr.used>(S.promos[k].used|0))S.promos[k].used=pr.used;
+    }
+  });
+  saveState();
+  return n;
+}
+function applySyncFromLaunch(){
+  var raw='';
+  // Telegram startapp / start_param
+  try{
+    if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param)raw=tg.initDataUnsafe.start_param;
+  }catch(e){}
+  // URL ?sync= or #sync=
+  try{
+    var u=new URL(location.href);
+    if(u.searchParams.get('sync'))raw=u.searchParams.get('sync');
+    if(!raw&&location.hash.indexOf('sync=')>=0)raw=location.hash.split('sync=')[1].split('&')[0];
+  }catch(e){}
+  if(!raw)return;
+  // startapp may prefix
+  if(raw.indexOf('p_')===0)raw=raw.slice(2);
+  var obj=decodePromos(raw);
+  if(!obj){obj=decodePromos(decodeURIComponent(raw))}
+  if(!obj)return;
+  var n=mergePromos(obj);
+  if(n>=0)toast('Промокоды синхронизированы');
+}
+function buildShareLink(){
+  var payload=encodePromos(S.promos);
+  if(!payload)return location.href.split('?')[0].split('#')[0];
+  var base=location.href.split('?')[0].split('#')[0];
+  return base+'?sync='+encodeURIComponent(payload);
+}
+
+
+function todayKey(){
+  var d=new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function yesterdayKey(){
+  var d=new Date();d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function dailyReward(streak){
+  if(streak<=1)return 5;
+  if(streak===2)return 10;
+  return 100;
+}
+function renderBonus(){
+  var wMsg=document.getElementById('welcomeMsg');
+  var dMsg=document.getElementById('dailyMsg');
+  var btnW=document.getElementById('btnWelcome');
+  var btnD=document.getElementById('btnDaily');
+  var streakEl=document.getElementById('streakVal');
+  if(streakEl)streakEl.textContent=S.dailyStreak|0;
+  if(S.welcome){
+    if(btnW){btnW.disabled=true;btnW.textContent='Получено ✓'}
+    if(wMsg){wMsg.className='ok';wMsg.textContent='Приветственный бонус уже получен'}
+  } else {
+    if(btnW){btnW.disabled=false;btnW.textContent='Забрать +25 ⭐'}
+    if(wMsg){wMsg.textContent='';wMsg.className=''}
+  }
+  var today=todayKey();
+  if(S.lastDaily===today){
+    if(btnD){btnD.disabled=true;btnD.textContent='Уже сегодня ✓'}
+    if(dMsg){dMsg.className='ok';dMsg.textContent='Возвращайся завтра. Сейчас серия: '+(S.dailyStreak|0)+' дн.'}
+  } else {
+    var nextStreak=1;
+    if(S.lastDaily===yesterdayKey())nextStreak=(S.dailyStreak|0)+1;
+    var rew=dailyReward(nextStreak);
+    if(btnD){btnD.disabled=false;btnD.textContent='Забрать +'+rew+' ⭐'}
+    if(dMsg){dMsg.textContent='';dMsg.className=''}
+  }
+}
+function claimWelcome(){
+  if(S.welcome){toast('Уже получено');return}
+  S.welcome=true;
+  S.user.stars+=25;
+  updateUserUI();bumpTop();saveState();
+  renderBonus();
+  toast('+25 ⭐ приветственный бонус');
+  if(tg&&tg.HapticFeedback)try{tg.HapticFeedback.notificationOccurred('success')}catch(e){}
+}
+function claimDaily(){
+  var today=todayKey();
+  if(S.lastDaily===today){toast('Уже забрал сегодня');return}
+  var streak=1;
+  if(S.lastDaily===yesterdayKey())streak=(S.dailyStreak|0)+1;
+  var rew=dailyReward(streak);
+  S.dailyStreak=streak;
+  S.lastDaily=today;
+  S.user.stars+=rew;
+  updateUserUI();bumpTop();saveState();
+  renderBonus();
+  toast('+'+rew+' ⭐ за день '+streak);
+  if(tg&&tg.HapticFeedback)try{tg.HapticFeedback.notificationOccurred('success')}catch(e){}
+}
+
+function runLoader(cb){
+  var f=document.getElementById('fill'),h=document.getElementById('hint'),i=0,steps=[[50,'Загрузка...'],[100,'Готово']];
+  var t=setInterval(function(){
+    if(i>=steps.length){clearInterval(t);setTimeout(function(){document.getElementById('loader').classList.add('out');setTimeout(function(){document.getElementById('loader').classList.add('hide');document.getElementById('app').classList.remove('hide');cb()},300)},100);return}
+    f.style.width=steps[i][0]+'%';h.textContent=steps[i][1];i++;
+  },280);
+}
+
+runLoader(function(){
+  updateUserUI();setupAll();renderA();renderTasks();
+  setInterval(function(){
+    document.querySelectorAll('[data-end]').forEach(function(el){el.textContent=cd(el.dataset.end)});
+    purgeOldChat();
+    saveState();
+  },1000);
+});
+})();
+</script>
+</body>
+</html>
